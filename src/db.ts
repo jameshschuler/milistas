@@ -1,7 +1,7 @@
 import { PgConnectionConfig } from 'knex';
 import path from 'path';
 
-require( 'dotenv' ).config( { path: path.resolve( __dirname, '../../.env' ) } );
+require( 'dotenv' ).config( { path: path.resolve( __dirname, '../.env' ) } );
 
 const config = {
     development: {
@@ -14,7 +14,7 @@ const config = {
             port: process.env.POSTGRES_PORT,
             host: process.env.POSTGRES_HOST,
             ssl: true
-        } as PgConnectionConfig,
+        } as PgConnectionConfig
     },
     production: {
         client: 'pg',
