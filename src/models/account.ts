@@ -1,5 +1,11 @@
-import { bookshelfRef } from '../index';
+import { Model, snakeCaseMappers } from 'objection';
 
-export const Account = bookshelfRef.model( 'Account', {
-    tableName: 'account'
-} );
+export default class Account extends Model {
+    static get columnNameMappers () {
+        return snakeCaseMappers();
+    }
+
+    static get tableName () {
+        return 'account';
+    }
+}

@@ -14,7 +14,7 @@ const config = {
             port: process.env.POSTGRES_PORT,
             host: process.env.POSTGRES_HOST,
             ssl: true
-        } as PgConnectionConfig
+        } as PgConnectionConfig,
     },
     production: {
         client: 'pg',

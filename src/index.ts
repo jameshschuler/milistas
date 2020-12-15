@@ -1,5 +1,4 @@
 import cors from '@koa/cors';
-import bookshelf from 'bookshelf';
 import { StatusCodes } from 'http-status-codes';
 import Knex from 'knex';
 import Koa from 'koa';
@@ -9,14 +8,13 @@ import helmet from 'koa-helmet';
 import json from 'koa-json';
 import logger from 'koa-logger';
 import Router from 'koa-router';
+import { Model } from 'objection';
 import { register } from './controllers/accountController';
 import connectionConfig from './db';
+import { KoaContext } from './types/koa';
 
 const knex = Knex( connectionConfig );
-
-export const bookshelfRef = bookshelf( knex );
-export type KoaContext = Koa.ParameterizedContext<any, Router.IRouterParamContext<any, {}>>;
-export type Next = () => Promise<any>;
+Model.knex( knex );
 
 const app = new Koa();
 
@@ -37,7 +35,7 @@ app.use( async function ( ctx, next ) {
         await next();
     } catch ( err ) {
         console.log( 'err', err )
-        ctx.status = err.status || 500;
+        ctx.status = err.statusCode || 500;
         ctx.type = 'json';
         ctx.body = {
             message: err.message || 'Something went wrong.',
