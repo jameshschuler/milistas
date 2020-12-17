@@ -1,6 +1,13 @@
 import { Model, snakeCaseMappers } from 'objection';
+import AccessCode from './accessCode';
 
 export default class Account extends Model {
+    public firstName: string;
+    public lastName: string;
+    public phoneNumber: string;
+    public emailAddress: string;
+    public isActive: boolean;
+
     static get columnNameMappers () {
         return snakeCaseMappers();
     }
@@ -8,4 +15,19 @@ export default class Account extends Model {
     static get tableName () {
         return 'account';
     }
+
+    static get idColumn () {
+        return 'account_id';
+    }
+
+    public static relationMappings = {
+        animal: {
+            relation: Model.HasOneRelation,
+            modelClass: AccessCode,
+            join: {
+                from: 'account.account_id',
+                to: 'access_code.access_code_id'
+            }
+        }
+    };
 }

@@ -30,6 +30,8 @@ app.use( json() );
 app.use( logger() );
 app.use( bodyParser() );
 
+// TODO: rate limiting
+
 app.use( async function ( ctx, next ) {
     try {
         await next();

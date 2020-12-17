@@ -13,13 +13,16 @@ const config = {
             password: process.env.POSTGRES_PASSWORD,
             port: process.env.POSTGRES_PORT,
             host: process.env.POSTGRES_HOST,
-            ssl: true
+            ssl: {
+                rejectUnauthorized: false
+            }
         } as PgConnectionConfig,
     },
     production: {
         client: 'pg',
         useNullAsDefault: true,
-        connection: process.env.DATABASE_URL
+        connection: process.env.DATABASE_URL,
+        ssl: true
     }
 } as any[ string ];
 
