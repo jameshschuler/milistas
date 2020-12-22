@@ -6,7 +6,6 @@ import { RegisterRequest, registerRequestSchema } from '../types/request/registe
 
 export async function register ( cxt: KoaContext, next: Next ) {
     const request = cxt.request.body as RegisterRequest;
-
     const result: Joi.ValidationResult = registerRequestSchema.validate( request, {
         abortEarly: false
     } );

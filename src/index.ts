@@ -49,7 +49,7 @@ app.use( async function ( ctx, next ) {
 } );
 
 app.on( 'error', ( err, ctx: KoaContext ) => {
-    console.error( 'server error', err, ctx )
+    // console.error( 'server error', err, ctx )
 } );
 
 const router = new Router();

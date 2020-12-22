@@ -7,6 +7,7 @@ export default class Account extends Model {
     public phoneNumber: string;
     public emailAddress: string;
     public isActive: boolean;
+    public accountId: number;
 
     static get columnNameMappers () {
         return snakeCaseMappers();
@@ -21,7 +22,7 @@ export default class Account extends Model {
     }
 
     public static relationMappings = {
-        animal: {
+        accessCode: {
             relation: Model.HasOneRelation,
             modelClass: AccessCode,
             join: {

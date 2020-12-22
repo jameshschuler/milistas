@@ -19,7 +19,7 @@ export default class AccessCode extends Model {
         return 'access_code_id';
     }
 
-    public relationMappings = {
+    public static relationMappings = {
         account: {
             relation: Model.BelongsToOneRelation,
             modelClass: Account,
