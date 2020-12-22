@@ -2,6 +2,6 @@
 
 ## TODO
 
-[ ] - Login endpoint
-[ ] - Add logging
-[ ] - API documentation
+- [ ] Login endpoint
+- [ ] Add logging
+- [ ] API documentation
