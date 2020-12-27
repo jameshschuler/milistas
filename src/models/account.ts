@@ -8,6 +8,7 @@ export default class Account extends Model {
     public emailAddress: string;
     public isActive: boolean;
     public accountId: number;
+    public username: string;
 
     static get columnNameMappers () {
         return snakeCaseMappers();

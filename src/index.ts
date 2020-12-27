@@ -9,7 +9,7 @@ import json from 'koa-json';
 import logger from 'koa-logger';
 import Router from 'koa-router';
 import { Model } from 'objection';
-import { register } from './controllers/accountController';
+import { login, register } from './controllers/accountController';
 import connectionConfig from './db';
 import { KoaContext } from './types/koa';
 
@@ -61,6 +61,7 @@ router.get( '/', async ( cxt, next ) => {
 } );
 
 router.post( '/api/v1/account/register', register );
+router.post( '/api/v1/account/login', login );
 
 app.use( router.routes() ).use( router.allowedMethods() );
 
