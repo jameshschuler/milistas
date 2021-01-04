@@ -9,6 +9,7 @@ export default class Account extends Model {
     public isActive: boolean;
     public accountId: number;
     public username: string;
+    public lastLogin: string;
 
     static get columnNameMappers () {
         return snakeCaseMappers();

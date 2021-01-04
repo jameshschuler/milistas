@@ -1,9 +1,18 @@
 import { StatusCodes } from 'http-status-codes';
 import Joi from 'joi';
+import { AccessCodeRequest } from 'src/types/request/accessCodeRequest';
 import accountService from '../services/accountService';
 import { KoaContext, Next } from '../types/koa';
 import { LoginRequest, loginRequestSchema } from '../types/request/loginRequest';
 import { RegisterRequest, registerRequestSchema } from '../types/request/registerRequest';
+
+export async function getAccessCode ( cxt: KoaContext, next: Next ) {
+    const request = cxt.request.body as AccessCodeRequest;
+
+    await accountService.getAccessCode( request.username );
+
+    cxt.response.status = StatusCodes.OK;
+}
 
 export async function register ( cxt: KoaContext, next: Next ) {
     const request = cxt.request.body as RegisterRequest;
@@ -50,7 +59,15 @@ export async function login ( cxt: KoaContext, next: Next ) {
         return;
     }
 
-    await accountService.login( result.value );
+    const response = await accountService.login( result.value );
 
     cxt.response.status = StatusCodes.OK;
+    cxt.body = response;
+}
+
+export async function getAccount ( cxt: KoaContext, next: Next ) {
+    const response = await accountService.getAccount( cxt.state?.user?.data?.accountId );
+
+    cxt.response.status = StatusCodes.OK;
+    cxt.body = response;
 }

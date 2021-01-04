@@ -1,11 +1,52 @@
 import dayjs from 'dayjs';
 import { StatusCodes } from 'http-status-codes';
+import jwt from 'jsonwebtoken';
 import { LoginRequest } from 'src/types/request/loginRequest';
 import AccessCode from '../models/accessCode';
 import Account from '../models/account';
 import { AppError } from '../types/error';
 import { RegisterRequest } from '../types/request/registerRequest';
 import { send } from './twilioService';
+
+require( 'dotenv' ).config();
+
+async function getAccessCode ( username: string ) {
+    if ( username === '' ) {
+        throw new AppError( 'Username is required.', StatusCodes.BAD_REQUEST );
+    }
+
+    const account = await Account.query().findOne( {
+        username
+    } );
+
+    if ( !account ) {
+        throw new AppError( 'Account not found.', StatusCodes.NOT_FOUND );
+    }
+
+    await sendAccessCode( account.accountId, account.phoneNumber );
+}
+
+async function getAccount ( accountId: number ) {
+    const account = await Account.query().findOne( {
+        account_id: accountId
+    } );
+
+    if ( !account ) {
+        throw new AppError( 'Account not found.', StatusCodes.NOT_FOUND );
+    }
+
+    const { firstName, lastName, phoneNumber, emailAddress, username, lastLogin } = account;
+
+    return {
+        accountId,
+        firstName,
+        lastName,
+        phoneNumber,
+        emailAddress,
+        username,
+        lastLogin
+    }
+}
 
 async function register ( request: RegisterRequest ) {
     const accountQuery = Account.query().where( {
@@ -48,38 +89,51 @@ async function login ( request: LoginRequest ) {
         throw new AppError( 'Invalid credentials', StatusCodes.BAD_REQUEST );
     }
 
-    await verifyAccessCode( account.accountId );
-}
+    await verifyAccessCode( account.accountId, request.accessCode );
 
-async function verifyAccessCode ( accountId: number ) {
-    const accessCode = await AccessCode.query().findOne( {
-        account_id: accountId
-    } );
+    const token = jwt.sign( {
+        data: {
+            accountId: account.accountId
+        }
+    }, process.env.SUPER_SECRET_SECRET!, { expiresIn: '168h' } ); // 7 days
 
-    console.log( accessCode );
-    // TODO: need to update db column to be of interval type to properly store and retrieve iso date string
-    if ( !accessCode || dayjs( accessCode.expirationDate ).isAfter( dayjs().toISOString() ) ) {
-        throw new AppError( 'Access token has expired.', StatusCodes.FORBIDDEN );
+    await Account.query()
+        .findById( account.accountId )
+        .patch( {
+            lastLogin: dayjs().toISOString()
+        } );
+
+    return {
+        accountId: account.accountId,
+        token
     }
 }
 
-async function sendAccessCode ( accountId: number, phoneNumber: string ) {
-    // TODO: make sure account exists
+async function sendAccessCode ( accountId: number, phoneNumber: string, verifyAccount: boolean = false ) {
+    if ( verifyAccount ) {
+        const account = await Account.query().findOne( {
+            account_id: accountId
+        } );
+
+        if ( !account ) {
+            throw new AppError( 'Account not found.', StatusCodes.NOT_FOUND );
+        }
+    }
 
     const existingAccessCode = await AccessCode.query().findOne( {
         account_id: accountId
     } );
 
     if ( existingAccessCode ) {
-        await AccessCode.query().deleteById( existingAccessCode.accountId );
+        await AccessCode.query().delete().where( 'account_id', '=', existingAccessCode.accountId );
     }
 
-    const accessCode = generateAccessCode();
+    const accessCode = generateAccessCode().toLocaleUpperCase();
 
     await AccessCode.query().insert( {
         accountId,
         code: accessCode,
-        expirationDate: dayjs().add( 5, 'minute' ).toISOString(),
+        expirationDate: dayjs().add( 10, 'minute' ).toISOString(),
     } );
 
     await send( phoneNumber, `Mi Listas Access Code. Your access code is ${accessCode}. This code expires in 10 minutes.` );
@@ -89,8 +143,23 @@ function generateAccessCode ( length: number = 8 ) {
     return Math.round( ( Math.pow( 36, length + 1 ) - Math.random() * Math.pow( 36, length ) ) ).toString( 36 ).slice( 1 );
 }
 
+async function verifyAccessCode ( accountId: number, requestedAccessCode: string ) {
+    const accessCode = await AccessCode.query().findOne( {
+        account_id: accountId
+    } );
+
+    if ( !accessCode || dayjs().isAfter( dayjs( accessCode.expirationDate ) ) ) {
+        throw new AppError( 'Access code has expired.', StatusCodes.FORBIDDEN );
+    }
+
+    if ( accessCode.code !== requestedAccessCode.toLocaleUpperCase() ) {
+        throw new AppError( 'Invalid access code.', StatusCodes.FORBIDDEN );
+    }
+}
+
 export default {
+    getAccessCode,
+    getAccount,
     login,
-    register,
-    sendAccessCode
+    register
 }
