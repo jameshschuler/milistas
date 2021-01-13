@@ -11,6 +11,7 @@ import logger from 'koa-logger';
 import Router from 'koa-router';
 import { Model } from 'objection';
 import { getAccessCode, getAccount, login, register } from './controllers/accountController';
+import { createList } from './controllers/listController';
 import connectionConfig from './db';
 import { KoaContext } from './types/koa';
 
@@ -30,7 +31,6 @@ app.use( logger() );
 app.use( helmet() );
 app.use( compress() );
 app.use( json() );
-app.use( logger() );
 app.use( bodyParser() );
 
 // TODO: rate limiting
@@ -39,6 +39,7 @@ app.use( async function ( ctx, next ) {
     try {
         await next();
     } catch ( err ) {
+        console.log( '******************' )
         console.log( 'err', err );
         if ( err.status === 401 ) {
             ctx.status = 401;
@@ -83,7 +84,9 @@ router.post( '/api/v1/account/register', register );
 router.post( '/api/v1/account/login', login );
 router.get( '/api/v1/account', getAccount );
 
-router.post( '/api/v1/account/accessCode', getAccessCode )
+router.post( '/api/v1/account/accessCode', getAccessCode );
+
+router.post( '/api/v1/list', createList );
 
 app.use( router.routes() ).use( router.allowedMethods() );
 
