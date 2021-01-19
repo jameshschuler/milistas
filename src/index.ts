@@ -11,7 +11,7 @@ import logger from 'koa-logger';
 import Router from 'koa-router';
 import { Model } from 'objection';
 import { getAccessCode, getAccount, login, register } from './controllers/accountController';
-import { createList } from './controllers/listController';
+import { createList, getAllLists, getList } from './controllers/listController';
 import connectionConfig from './db';
 import { KoaContext } from './types/koa';
 
@@ -39,7 +39,6 @@ app.use( async function ( ctx, next ) {
     try {
         await next();
     } catch ( err ) {
-        console.log( '******************' )
         console.log( 'err', err );
         if ( err.status === 401 ) {
             ctx.status = 401;
@@ -87,6 +86,8 @@ router.get( '/api/v1/account', getAccount );
 router.post( '/api/v1/account/accessCode', getAccessCode );
 
 router.post( '/api/v1/list', createList );
+router.get( '/api/v1/list', getAllLists );
+router.get( '/api/v1/list/:id', getList );
 
 app.use( router.routes() ).use( router.allowedMethods() );
 

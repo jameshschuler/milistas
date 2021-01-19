@@ -24,6 +24,46 @@ async function createList ( accountId: number, request: CreateListRequest ) {
     } );
 }
 
+async function getAllLists ( accountId: number ) {
+    const lists = await List.query().where( {
+        account_id: accountId,
+    } );
+
+    return lists.map( ( { isVisible, listId, listTypeId, name, createdOn, updatedOn }: List ) => {
+        return {
+            listId,
+            name,
+            isVisible,
+            listTypeId,
+            createdOn,
+            updatedOn,
+        }
+    } );
+}
+
+async function getList ( accountId: number, listId: number ) {
+    const list = await List.query().findOne( {
+        account_id: accountId,
+        list_id: listId
+    } );
+
+    if ( !list ) {
+        throw new AppError( 'List not found.', StatusCodes.NOT_FOUND );
+    }
+
+    const { isVisible, listTypeId, name, createdOn, updatedOn } = list;
+
+    return {
+        listId,
+        name,
+        isVisible,
+        listTypeId,
+        createdOn,
+        updatedOn,
+        listItems: []
+    };
+}
+
 async function isValidListType ( listTypeId: number ) {
     const listType = await ListType.query().findById( listTypeId );
 
@@ -33,5 +73,7 @@ async function isValidListType ( listTypeId: number ) {
 }
 
 export default {
-    createList
+    createList,
+    getAllLists,
+    getList
 }

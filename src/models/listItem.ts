@@ -1,26 +1,26 @@
 import { Model, snakeCaseMappers } from 'objection';
 import Account from './account';
-import ListItem from './listItem';
+import List from './list';
 
-export default class List extends Model {
+export default class ListItem extends Model {
     accountId: number;
     createdOn: number;
     isVisible: boolean;
     listId: number;
-    listTypeId: number;
-    name: string;
+    title: string;
     updatedOn: string;
+    value: string;
 
     static get columnNameMappers () {
         return snakeCaseMappers();
     }
 
     static get tableName () {
-        return 'list';
+        return 'list_item';
     }
 
     static get idColumn () {
-        return 'list_id';
+        return 'list_item_id';
     }
 
     public static relationMappings = {
@@ -28,16 +28,16 @@ export default class List extends Model {
             relation: Model.BelongsToOneRelation,
             modelClass: Account,
             join: {
-                from: 'list.account_id',
+                from: 'list_item.account_id',
                 to: 'account.account_id'
             }
         },
-        listItems: {
-            relation: Model.HasManyRelation,
-            modelClass: ListItem,
+        list: {
+            relation: Model.BelongsToOneRelation,
+            modelClass: List,
             join: {
-                from: 'list.list_id',
-                to: 'list_item.list_id'
+                from: 'list_item.list_id',
+                to: 'list.list_id'
             }
         }
     }
